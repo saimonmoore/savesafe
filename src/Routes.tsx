@@ -10,8 +10,9 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<AuthenticatedLayout />}>
-      <Route index element={<Dashboard />} />
-      <Route path="about" element={<About />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/:spaceId" element={<Dashboard />} />
+        <Route path="about" element={<About />} />
       </Route>
 
       <Route element={<UnauthenticatedLayout />}>

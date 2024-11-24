@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "types": [
+      "node",
+      "sharedworker"
+    ],
     "paths": {
       "@/*": ["./src/*"]
     },
+    "emitDeclarationOnly": false,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -26,5 +31,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "exclude": [
+    "vite.config.ts"
+  ],
+  "include": ["src"],
+  "references": []
 }
