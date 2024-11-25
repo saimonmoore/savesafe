@@ -1,5 +1,4 @@
 import path from "node:path";
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { defineConfig } from "vite";
 import ReactPlugin from "@vitejs/plugin-react-swc";
 import TopLevelAwaitPlugin from "vite-plugin-top-level-await";
@@ -18,7 +17,7 @@ export default defineConfig({
     ConfigPlugin(),
     TopLevelAwaitPlugin(),
     WasmPlugin(),
-    ReactPlugin(),
+    ReactPlugin({ jsxRuntime: 'classic' }),
   ],
   build: {
     sourcemap: true,
