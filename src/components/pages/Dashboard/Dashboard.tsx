@@ -1,7 +1,18 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Upload, DollarSign, TrendingDown, TrendingUp } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { AreaChart } from "@/components/view/Charts/AreaChart/AreaChart";
+import { BarChart } from "@/components/view/Charts/BarChart/BarChart";
+import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
+import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
+import { Upload, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
 
 export default function Dashboard() {
   return (
@@ -77,7 +88,9 @@ export default function Dashboard() {
                 <TableCell>2023-05-31</TableCell>
                 <TableCell>Salary Deposit</TableCell>
                 <TableCell>Income</TableCell>
-                <TableCell className="text-right text-green-600">$3,000.00</TableCell>
+                <TableCell className="text-right text-green-600">
+                  $3,000.00
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>2023-05-30</TableCell>
@@ -90,16 +103,8 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Spending Insights</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-            Spending chart placeholder
-          </div>
-        </CardContent>
-      </Card>
+      <DonutChart />
+      <StackedAreaChart />
     </div>
-  )
+  );
 }
