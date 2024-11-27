@@ -8,8 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AreaChart } from "@/components/view/Charts/AreaChart/AreaChart";
-import { BarChart } from "@/components/view/Charts/BarChart/BarChart";
+// import { AreaChart } from "@/components/view/Charts/AreaChart/AreaChart";
+// import { BarChart } from "@/components/view/Charts/BarChart/BarChart";
 import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
 import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
 import { Upload, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
