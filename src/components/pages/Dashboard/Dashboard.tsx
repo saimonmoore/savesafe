@@ -12,16 +12,53 @@ import {
 // import { BarChart } from "@/components/view/Charts/BarChart/BarChart";
 import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
 import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
-import { Upload, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
+import { FileUploader } from "@/components/view/FileUploader/FileUploader";
+import { DollarSign, TrendingDown, TrendingUp } from "lucide-react";
+import { useState } from "react";
 
 export default function Dashboard() {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+
+  const handleFilesUploaded = (files: File[]) => {
+    setUploadedFiles(files)
+  }
+
+  const MAX_FILES = 3;
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
+  console.log("Uploaded files:", uploadedFiles)
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" /> Upload CSV
-        </Button>
+        <FileUploader
+          maxFiles={MAX_FILES}
+          maxSize={MAX_FILE_SIZE}
+          accept={{
+            "application/vnd.ms-excel": [".xls", ".xlt"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.template": [".xltx"],
+            "application/vnd.ms-excel.addin.macroEnabled.12": [".xlam"],
+            "application/vnd.ms-excel.sheet.binary.macroEnabled.12": [".xlsb"],
+            "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
+            "application/vnd.apple.numbers": [".numbers"],
+            "application/vnd.lotus-1-2-3": [".wk1", ".wk3", ".wk4"],
+            "text/csv": [".csv"],
+            "text/tab-separated-values": [".tsv"],
+            "application/x-prn": [".prn"],
+            "application/json": [".json"],
+            "application/pdf": [".pdf"]
+          }}
+          onFilesUploaded={handleFilesUploaded}
+          dropzoneText={{
+            title: "Upload transactions",
+            description: "Drop your files here or click to browse",
+            dragActive: "Drop the files here",
+            fileCount: `Upload up to ${MAX_FILES} files (max ${MAX_FILE_SIZE}MB each)`,
+            allowedTypes: "Allowed file types:",
+          }}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
