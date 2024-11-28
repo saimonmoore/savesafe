@@ -4,7 +4,8 @@ import {
   MLCEngineInterface,
   InitProgressReport,
   ChatCompletionMessageParam,
-  ChatCompletion
+  ChatCompletion,
+  ResponseFormat
 } from "@mlc-ai/web-llm";
 
 interface LLMlifecycle {
@@ -140,9 +141,9 @@ class WebLLMManager {
 
     try {
       const response = await Promise.race([
-        this.engine.chat.completions.create({ messages }),
+        this.engine.chat.completions.create({ messages, response_format: { type: "json_object" } as ResponseFormat },),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Request timed out")), 30000)
+          setTimeout(() => reject(new Error("Request timed out")), 60000)
         )
       ]);
 
