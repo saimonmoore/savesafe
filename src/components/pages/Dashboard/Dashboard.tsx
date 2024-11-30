@@ -13,43 +13,86 @@ import {
 import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
 import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
 import { FileUploader } from "@/components/view/FileUploader/FileUploader";
-import { DollarSign, TrendingDown, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { Transaction } from "@/domain/models/Transaction/Transaction";
+import { TransactionParser } from "@/lib/TransactionParser/TransactionParser";
+import { WebLLM } from "@/lib/webllm";
+import type { LLMClient } from "@/lib/webllm";
+import { DollarSign, Loader2, TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+
+async function parseTransactions(uploadedFiles: File[]): Promise<Transaction[]> {
+  const transactionParser = new TransactionParser(WebLLM as LLMClient);
+  let transactions: Transaction[] = [];
+  try {
+    transactions = await transactionParser.parseTransactions(uploadedFiles)
+  } catch (TransactionParserError) {
+    console.error("Error parsing transactions:", TransactionParserError);
+  }
+
+  return transactions;
+};
 
 export default function Dashboard() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [parsingTransactions, setParsingTransactions] = useState<boolean>(false)
+  const [rawTransactions, setRawTransactions] = useState<Transaction[]>([])
 
   const handleFilesUploaded = (files: File[]) => {
     setUploadedFiles(files)
   }
 
+  useEffect(() => {
+    console.log("Files uploaded:", uploadedFiles)
+
+    async function processFiles() {
+      setRawTransactions(await parseTransactions(uploadedFiles));
+      setParsingTransactions(false);
+      setUploadedFiles([]);
+    }
+
+    if (uploadedFiles.length > 0) {
+      setParsingTransactions(true);
+      processFiles();
+    }
+
+  }, [uploadedFiles])
+
+  useEffect(() => {
+    console.log("Raw transactions:", rawTransactions)
+  }, [rawTransactions])
+
   const MAX_FILES = 3;
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-
-  console.log("Uploaded files:", uploadedFiles)
+  const SUPPORTED_FILE_TYPES = {
+    // "application/vnd.ms-excel": [".xls", ".xlt"],
+    // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+    // "application/vnd.openxmlformats-officedocument.spreadsheetml.template": [".xltx"],
+    // "application/vnd.ms-excel.addin.macroEnabled.12": [".xlam"],
+    // "application/vnd.ms-excel.sheet.binary.macroEnabled.12": [".xlsb"],
+    // "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
+    // "application/vnd.apple.numbers": [".numbers"],
+    // "application/vnd.lotus-1-2-3": [".wk1", ".wk3", ".wk4"],
+    "text/csv": [".csv"],
+    // "text/tab-separated-values": [".tsv"],
+    // "application/x-prn": [".prn"],
+    // "application/json": [".json"],
+    // "application/pdf": [".pdf"]
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <FileUploader
+        {parsingTransactions && (
+          <Button disabled>
+            <Loader2 className="animate-spin" />
+            Parsing Transactions...
+          </Button>)
+        }
+        {!parsingTransactions && <FileUploader
           maxFiles={MAX_FILES}
           maxSize={MAX_FILE_SIZE}
-          accept={{
-            "application/vnd.ms-excel": [".xls", ".xlt"],
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.template": [".xltx"],
-            "application/vnd.ms-excel.addin.macroEnabled.12": [".xlam"],
-            "application/vnd.ms-excel.sheet.binary.macroEnabled.12": [".xlsb"],
-            "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
-            "application/vnd.apple.numbers": [".numbers"],
-            "application/vnd.lotus-1-2-3": [".wk1", ".wk3", ".wk4"],
-            "text/csv": [".csv"],
-            "text/tab-separated-values": [".tsv"],
-            "application/x-prn": [".prn"],
-            "application/json": [".json"],
-            "application/pdf": [".pdf"]
-          }}
+          accept={SUPPORTED_FILE_TYPES}
           onFilesUploaded={handleFilesUploaded}
           dropzoneText={{
             title: "Upload transactions",
@@ -58,7 +101,7 @@ export default function Dashboard() {
             fileCount: `Upload up to ${MAX_FILES} files (max ${MAX_FILE_SIZE}MB each)`,
             allowedTypes: "Allowed file types:",
           }}
-        />
+        />}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

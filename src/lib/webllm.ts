@@ -8,13 +8,25 @@ import {
   ResponseFormat
 } from "@mlc-ai/web-llm";
 
+interface LLMResponse {
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}
+
+interface LLMClient {
+  generateResponse(messages: { role: string, content: string }[]): Promise<LLMResponse>;
+}
+
 interface LLMlifecycle {
   onModelLoading: (progress: number, text?: string) => void;
   onModelReady: () => void;
   onModelError: (error: Error) => void;
 }
 
-class WebLLMManager {
+class WebLLMManager implements LLMClient {
   private static instance: WebLLMManager;
   private engine: MLCEngineInterface | null = null;
   public selectedModel: string = "Qwen2.5-7B-Instruct-q4f32_1-MLC";
@@ -168,3 +180,13 @@ class WebLLMManager {
 
 // Singleton export for easy usage
 export const WebLLM = WebLLMManager.getInstance();
+export interface LLMResponse {
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}export interface LLMClient {
+  generateResponse(messages: { role: string; content: string; }[]): Promise<LLMResponse>;
+}
+
