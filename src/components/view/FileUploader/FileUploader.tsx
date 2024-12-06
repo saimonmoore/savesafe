@@ -26,7 +26,8 @@ export interface FileUploaderProps {
     dragActive?: string
     fileCount?: string
     allowedTypes?: string
-  }
+  },
+  disabled?: boolean
 }
 
 export function FileUploader({
@@ -45,6 +46,7 @@ export function FileUploader({
     fileCount: `You can upload ${maxFiles} files (up to ${Math.round(maxSize / 1024 / 1024)}MB each)`,
     allowedTypes: "Allowed file types:",
   },
+  disabled = false,
 }: FileUploaderProps) {
   const [open, setOpen] = React.useState(false)
   const [dragActive, setDragActive] = React.useState(false)
@@ -96,7 +98,8 @@ export function FileUploader({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <Button onClick={() => setOpen(true)} className="w-full sm:w-auto">
+      {/* // TODO: Show tooltip on disabled button */}
+      <Button onClick={() => setOpen(true)} className="w-full sm:w-auto" disabled={disabled} >
         <UploadIcon className="mr-2 h-4 w-4" />
         {dropzoneText.title}
       </Button>

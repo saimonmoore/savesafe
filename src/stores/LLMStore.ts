@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand'
 
 export interface LLMStore {
   llmReady: boolean
-  setllmReady: (ready: boolean) => void
+  setLlmReady: (ready: boolean) => void
 }
 
 export const createLLMStore: StateCreator<
@@ -12,5 +12,5 @@ export const createLLMStore: StateCreator<
   LLMStore
 > = (set) => ({
   llmReady: false,
-  setllmReady: (ready: boolean) => set(() => ({ llmReady: ready })),
+  setLlmReady: (ready: boolean) => set(() => ({ llmReady: ready })),
 })

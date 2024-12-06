@@ -1,4 +1,4 @@
-import { WebLLM } from "@/lib/webllm"
+import { WebLLM } from "@/lib/LLM/WebLLMManager"
 import { LLMBadge } from "@/components/view/LLMBadge/LLMBadge";
 import { Button } from "@/components/ui/button"
 import {

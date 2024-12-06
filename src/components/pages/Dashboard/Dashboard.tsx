@@ -14,22 +14,17 @@ import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
 import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
 import { FileUploader } from "@/components/view/FileUploader/FileUploader";
 import { Transaction } from "@/domain/models/Transaction/Transaction";
-import { TransactionParser } from "@/lib/TransactionParser/TransactionParser";
-import { WebLLM } from "@/lib/webllm";
-import type { LLMClient } from "@/lib/webllm";
+import { TransactionProcessor } from "@/lib/TransactionProcessor/TransactionProcessor";
+import { useStore } from "@/stores";
 import { DollarSign, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
-async function parseTransactions(uploadedFiles: File[]): Promise<Transaction[]> {
-  const transactionParser = new TransactionParser(WebLLM as LLMClient);
-  let transactions: Transaction[] = [];
+function processTransactions(uploadedFiles: File[], setRawTransactions: (transactions: Transaction[]) => void) {
   try {
-    transactions = await transactionParser.parseTransactions(uploadedFiles)
+    TransactionProcessor.getInstance().process(uploadedFiles, setRawTransactions)
   } catch (TransactionParserError) {
     console.error("Error parsing transactions:", TransactionParserError);
   }
-
-  return transactions;
 };
 
 export default function Dashboard() {
@@ -37,16 +32,15 @@ export default function Dashboard() {
   const [parsingTransactions, setParsingTransactions] = useState<boolean>(false)
   const [rawTransactions, setRawTransactions] = useState<Transaction[]>([])
 
+  const {llmReady} = useStore(state => (state));
+
   const handleFilesUploaded = (files: File[]) => {
     setUploadedFiles(files)
   }
 
   useEffect(() => {
-    console.log("Files uploaded:", uploadedFiles)
-
-    async function processFiles() {
-      setRawTransactions(await parseTransactions(uploadedFiles));
-      setParsingTransactions(false);
+    function processFiles() {
+      processTransactions(uploadedFiles, setRawTransactions);
       setUploadedFiles([]);
     }
 
@@ -59,6 +53,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     console.log("Raw transactions:", rawTransactions)
+    if (rawTransactions.length > 0) {
+      setParsingTransactions(false);
+    }
   }, [rawTransactions])
 
   const MAX_FILES = 3;
@@ -83,6 +80,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        {/* TODO: Disable upload button while LLM is not ready; EventEmitter */}
         {parsingTransactions && (
           <Button disabled>
             <Loader2 className="animate-spin" />
@@ -101,6 +99,7 @@ export default function Dashboard() {
             fileCount: `Upload up to ${MAX_FILES} files (max ${MAX_FILE_SIZE}MB each)`,
             allowedTypes: "Allowed file types:",
           }}
+          disabled={!llmReady}
         />}
       </div>
 

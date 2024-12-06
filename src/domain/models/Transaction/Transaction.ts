@@ -1,3 +1,8 @@
+export enum TransactionEvents {
+    TransactionsParsed = "TransactionsParsedEvent",
+    TransactionsCategorized = "TransactionsCategorizedEvent"
+}
+
 export interface RawTransaction {
     merchant: string;
     amount: number;
@@ -9,17 +14,17 @@ export interface RawTransaction {
 export class Transaction {
     merchant: string;
     amount: number;
-    balance: number;
+    balance?: number;
     transactionDate: Date;
-    effectiveDate: Date;
+    effectiveDate?: Date;
     category?: string;
 
     constructor(
         merchant: string,
         amount: number,
-        balance: number,
         transactionDate: Date,
-        effectiveDate: Date
+        balance?: number,
+        effectiveDate?: Date
     ) { 
         this.merchant = merchant;
         this.amount = amount;
@@ -36,9 +41,9 @@ export class Transaction {
         return new Transaction(
             json.merchant,
             json.amount,
-            json.balance,
             new Date(json.transactionDate),
-            new Date(json.effectiveDate)
+            json.balance,
+            json.effectiveDate ? new Date(json.effectiveDate) : undefined
         );
     }
 }

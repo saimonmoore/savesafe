@@ -1,5 +1,5 @@
 import { TransactionParserError, NotCSVParserError } from "@/lib/TransactionParser/errors";
-import type { LLMClient } from "@/lib/webllm";
+import { WorkerLLMManager } from "@/lib/LLM/WorkerLLMManager";
 
 interface CSVHeaders {
     headers: string;
@@ -8,10 +8,10 @@ interface CSVHeaders {
 type AIHeaderExtractionResponse = { error: string } | CSVHeaders;
 
 class CSVHeaderParser {
-    private llmClient: LLMClient;
+    private llmManager: WorkerLLMManager;
 
-    constructor(webLLM: LLMClient) {
-        this.llmClient = webLLM;
+    constructor() {
+        this.llmManager = WorkerLLMManager.getInstance();
     }
 
     public async extractWithAI(headerLines: string): Promise<string> {
@@ -29,7 +29,7 @@ Extract the table headers from this csv file:
 ${headerLines}
         `;
 
-        const response = await this.llmClient.generateResponse([
+        const response = await this.llmManager.requestInference([
             { role: "system", content: "You are an experienced CSV expert that identifies CSV headers." },
             { role: "user", content: prompt }
         ]);
