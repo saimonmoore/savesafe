@@ -1,14 +1,8 @@
+import { CategorizationMethod } from "@/db/schemas/Transaction";
+
 export enum TransactionEvents {
     TransactionsParsed = "TransactionsParsedEvent",
     TransactionsCategorized = "TransactionsCategorizedEvent"
-}
-
-export enum CategorizationMethod {
-    AI_BATCH = "ai_batch",
-    AI_BATCH_ERROR = "ai_batch_error",
-    STORED = "stored",
-    PATTERN = "pattern",
-    FUZZY = "fuzzy"
 }
 
 export interface RawTransaction {
@@ -22,6 +16,7 @@ export interface RawTransaction {
 export class Transaction {
     merchant: string;
     amount: number;
+    id?: number;
     balance?: number;
     transactionDate: Date;
     effectiveDate?: Date;
@@ -37,7 +32,8 @@ export class Transaction {
         effectiveDate?: Date,
         category?: string,
         confidence?: number,
-        categorizationMethod?: CategorizationMethod
+        categorizationMethod?: CategorizationMethod,
+        id?: number,
     ) { 
         this.merchant = merchant;
         this.amount = amount;
@@ -47,6 +43,7 @@ export class Transaction {
         this.category = category;
         this.confidence = confidence;
         this.categorizationMethod = categorizationMethod;
+        this.id = id;
     }
 
     categorize(category: string, confidence: number, method: CategorizationMethod): void {
