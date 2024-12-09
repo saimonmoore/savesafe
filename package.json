@@ -10,8 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "db:generate": "npm drizzle-kit generate",
-    "db:migrate": "npm drizzle-kit migrate"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.76",
