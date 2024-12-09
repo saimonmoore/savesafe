@@ -1,34 +1,16 @@
-export enum CategorizationMethod {
-    AI_BATCH = "ai_batch",
-    AI_BATCH_ERROR = "ai_batch_error",
-    STORED = "stored",
-    PATTERN = "pattern",
-    FUZZY = "fuzzy"
-}
-
-export enum Categories {
-    Housing = "housing",
-    Utilities = "utilities",
-    Food = "food",
-    Transport = "transport",
-    Technology = "technology",
-    Entertainment = "entertainment",
-    Finance = "finance",
-    Education = "education",
-    Healthcare = "healthcare",
-    Shopping = "shopping",
-    Telecommunications = "telecommunications",
-    Other = "other"
-}
+import { Categories } from "@/db/schemas/Category";
 
 export const CATEGORIES = Object.values(Categories);
 
 export class Category {
+    id?: number;
     category: string;
 
     constructor(
         category: string,
+        id?: number,
     ) { 
         this.category = category;
+        this.id = id;
     }
 }
