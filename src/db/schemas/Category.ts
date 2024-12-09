@@ -30,6 +30,6 @@ export const categoryTable = dbSchema.table(
     ...timestamps,
   },
   (table) => [
-    t.index("category_idx").on(table.category),
+    t.index("categories_category_idx").on(table.category),
   ]
 );

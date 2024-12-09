@@ -1,3 +1,4 @@
+import { categoryTable } from "./Category";
 import { timestamps } from "./column.helpers";
 import { dbSchema } from "./schema";
 import * as t from "drizzle-orm/pg-core";
@@ -26,18 +27,16 @@ export const transactionTable = dbSchema.table(
     amount: t.numeric().notNull(),
     balance: t.numeric().notNull(),
     category: t.varchar({ length: 255 }).notNull(),
+    categoryId: t.integer().references(() => categoryTable.id),
     confidence: t.integer().notNull(),
     categorizationMethod: categorizationMethodEnum().notNull(),
     manuallyCategorized: t.boolean().default(false),
     ...timestamps,
   },
   (table) => [
-    t.index("merchant_idx").on(table.merchant),
-    t.index("transaction_date_idx").on(table.transactionDate),
-    t.index("category_idx").on(table.category),
+    t.index("transactions_merchant_idx").on(table.merchant),
+    t.index("transactions_transaction_date_idx").on(table.transactionDate),
+    t.index("transactions_category_idx").on(table.category),
+    t.index("transactions_category_id_idx").on(table.categoryId),
   ]
 );
-
-export const systemTable = dbSchema.table("system", {
-  version: t.integer().notNull().default(0),
-});
