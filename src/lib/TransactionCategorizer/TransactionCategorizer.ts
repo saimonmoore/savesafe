@@ -1,73 +1,32 @@
 import { FuzzyMatcher } from '@/lib/TransactionCategorizer/FuzzyMatcher';
+import { MappingError, MerchantMapping, TransactionPattern } from './Types';
+import { WorkerLLMManager } from '@/lib/LLM/WorkerLLMManager';
+import { CategorizationMethod, Transaction } from '@/domain/models/Transaction/Transaction';
+import { StorageBackend } from './storage/Storage';
+import { InMemoryStorage } from './storage/InMemoryStorage';
+import { Categories, CATEGORIES } from '@/domain/models/Category/Category';
 
-interface TransactionPattern {
-    pattern: string;
-    category: string;
-    confidence: number;
-    isRegex?: boolean;
-}
+export class EnhancedTransactionCategorizer {
+    private llmManager: WorkerLLMManager;
+    private storage: StorageBackend;
 
-interface MerchantMapping {
-    merchant: string;
-    category: string;
-    confidence: number;
-    isManual?: boolean;
-    aliases?: string[];
-}
-
-interface Transaction {
-    description: string;
-    amount: number;
-    date: Date;
-    category?: string;
-    confidence?: number;
-    categorizationMethod?: string;
-}
-
-interface LLMResponse {
-    choices: {
-        message: {
-            content: string;
-        };
-    }[];
-}
-
-interface LLMClient {
-    generateResponse(messages: { role: string, content: string }[]): Promise<LLMResponse>;
-}
-
-type MappingError = { merchant: string, error: Error | string };
-
-
-class EnhancedTransactionCategorizer {
-    private patterns: TransactionPattern[] = [];
-    private merchantMappings: MerchantMapping[] = [];
-    private similarityCache: Record<string, [string, number][]> = {};
-    private llmClient: LLMClient;
-
-    constructor(llmClient: LLMClient) {
-        this.llmClient = llmClient;
+    constructor(storage?: StorageBackend) {
+        this.llmManager = WorkerLLMManager.getInstance();
+        this.storage = storage || new InMemoryStorage();
     }
 
-    bulkImportCategories(mappings: MerchantMapping[]): { success: string[], error: MappingError[] } {
+    async bulkImportCategories(mappings: MerchantMapping[]): Promise<{ success: string[], error: MappingError[] }> {
+        const existingMappings = await this.storage.loadMerchantMappings();
         const results: { success: string[], error: MappingError[] } = { success: [], error: [] };
 
         mappings.forEach(mapping => {
             try {
-                const existingIndex = this.merchantMappings.findIndex(
-                    m => m.merchant === mapping.merchant
-                );
+                const existingIndex = existingMappings.findIndex(m => m.merchant === mapping.merchant);
 
                 if (existingIndex !== -1) {
-                    this.merchantMappings[existingIndex] = mapping;
+                    existingMappings[existingIndex] = mapping;
                 } else {
-                    this.merchantMappings.push(mapping);
-                }
-
-                if (mapping.aliases) {
-                    mapping.aliases.forEach(alias => {
-                        FuzzyMatcher.calculateSimilarity(mapping.merchant, alias);
-                    });
+                    existingMappings.push(mapping);
                 }
 
                 results.success.push(mapping.merchant);
@@ -79,47 +38,52 @@ class EnhancedTransactionCategorizer {
             }
         });
 
+        await this.storage.saveMerchantMappings(existingMappings);
         return results;
     }
 
-    findMerchantCategory(merchant: string): { category: string, confidence: number, method: string } | null {
-        const directMapping = this.merchantMappings.find(m => m.merchant === merchant);
+    async findMerchantCategory(merchant: string): Promise<{ category: string, confidence: number, method: CategorizationMethod } | null> {
+        const merchantMappings = await this.storage.loadMerchantMappings();
+        const directMapping = merchantMappings.find(m => m.merchant === merchant);
         if (directMapping) {
             return {
                 category: directMapping.category,
                 confidence: directMapping.confidence,
-                method: 'stored'
+                method: CategorizationMethod.STORED
             };
         }
 
-        const patternMatch = this.patterns.find(p =>
-        (p.isRegex ? new RegExp(p.pattern, 'i').test(merchant) :
-            merchant.toLowerCase().includes(p.pattern.toLowerCase()))
+        const patterns = await this.storage.loadPatterns();
+        const patternMatch = patterns.find(p =>
+            (p.isRegex ? new RegExp(p.pattern, 'i').test(merchant) :
+                merchant.toLowerCase().includes(p.pattern.toLowerCase()))
         );
 
         if (patternMatch) {
             return {
                 category: patternMatch.category,
                 confidence: patternMatch.confidence,
-                method: 'pattern'
+                method: CategorizationMethod.PATTERN
             };
         }
 
-        if (!this.similarityCache[merchant]) {
-            const merchants = this.merchantMappings.map(m => m.merchant);
-            this.similarityCache[merchant] = FuzzyMatcher.findSimilarMerchants(merchant, merchants);
+        const similarityCache = await this.storage.loadSimilarityCache();
+        if (!similarityCache[merchant]) {
+            const merchants = merchantMappings.map(m => m.merchant);
+            similarityCache[merchant] = FuzzyMatcher.findSimilarMerchants(merchant, merchants);
+            await this.storage.saveSimilarityCache(similarityCache);
         }
 
-        const similarMerchants = this.similarityCache[merchant];
+        const similarMerchants = similarityCache[merchant];
         if (similarMerchants.length > 0) {
             const [bestMatch, similarity] = similarMerchants[0];
-            const similarMapping = this.merchantMappings.find(m => m.merchant === bestMatch);
+            const similarMapping = merchantMappings.find(m => m.merchant === bestMatch);
 
             if (similarMapping) {
                 return {
                     category: similarMapping.category,
                     confidence: similarMapping.confidence * similarity,
-                    method: 'fuzzy'
+                    method: CategorizationMethod.FUZZY
                 };
             }
         }
@@ -127,14 +91,25 @@ class EnhancedTransactionCategorizer {
         return null;
     }
 
-    async bulkCategorize(transactions: Transaction[]): Promise<Transaction[]> {
-        const uniqueMerchants = [...new Set(transactions.map(t => t.description))];
-        const merchantCategories = new Map<string, { category: string, confidence: number, method: string }>();
+    async addPattern(pattern: TransactionPattern): Promise<void> {
+        const patterns = await this.storage.loadPatterns();
+        patterns.push(pattern);
+        await this.storage.savePatterns(patterns);
+    }
 
-        // First pass: use local methods (stored mappings, patterns, fuzzy matching)
+    async addMerchantMapping(merchant: string, category: Categories): Promise<void> {
+        const merchantMappings = await this.storage.loadMerchantMappings();
+        merchantMappings.push({ merchant, category, confidence: 1, isManual: true });
+        await this.storage.saveMerchantMappings(merchantMappings);
+    }
+
+    async bulkCategorize(transactions: Transaction[]): Promise<Transaction[]> {
+        const uniqueMerchants = [...new Set(transactions.map(t => t.merchant))];
+        const merchantCategories = new Map<string, { category: string, confidence: number, method: CategorizationMethod }>();
+
         const unmatchedMerchants: string[] = [];
         for (const merchant of uniqueMerchants) {
-            const result = this.findMerchantCategory(merchant);
+            const result = await this.findMerchantCategory(merchant);
 
             if (result) {
                 merchantCategories.set(merchant, result);
@@ -143,7 +118,6 @@ class EnhancedTransactionCategorizer {
             }
         }
 
-        // Batch AI categorization for unmatched merchants
         if (unmatchedMerchants.length > 0) {
             const batchedResult = await this.getAiBatchCategory(unmatchedMerchants);
             
@@ -152,31 +126,41 @@ class EnhancedTransactionCategorizer {
             }
         }
 
-        // Apply categories to transactions
+        // Persist the categorized merchants back to the storage
+        const existingMappings = await this.storage.loadMerchantMappings();
+        merchantCategories.forEach((value, merchant) => {
+            const existingIndex = existingMappings.findIndex(m => m.merchant === merchant);
+            const newMapping: MerchantMapping = {
+                merchant,
+                category: value.category,
+                confidence: value.confidence,
+                isManual: value.method === CategorizationMethod.STORED
+            };
+
+            if (existingIndex !== -1) {
+                existingMappings[existingIndex] = newMapping;
+            } else {
+                existingMappings.push(newMapping);
+            }
+        });
+        await this.storage.saveMerchantMappings(existingMappings);
+
         return transactions.map(tx => {
-            const categoryInfo = merchantCategories.get(tx.description);
-            return categoryInfo ? {
-                ...tx,
-                category: categoryInfo.category,
-                confidence: categoryInfo.confidence,
-                categorizationMethod: categoryInfo.method
-            } : tx;
+            const categoryInfo = merchantCategories.get(tx.merchant);
+            if (categoryInfo) {
+                tx.categorize(categoryInfo.category, categoryInfo.confidence, categoryInfo.method);
+            }
+            return tx;
         });
     }
 
-    async getAiBatchCategory(merchants: string[]): Promise<Map<string, { category: string, confidence: number, method: string }>> {
-        const categories = [
-            'housing', 'utilities', 'food', 'transport', 'technology',
-            'entertainment', 'finance', 'education', 'healthcare',
-            'shopping', 'telecommunications', 'other'
-        ];
-
+    async getAiBatchCategory(merchants: string[]): Promise<Map<string, { category: string, confidence: number, method: CategorizationMethod }>> {
         try {
-            const response = await this.llmClient.generateResponse([
+            const response = await this.llmManager.requestInference([
                 {
                     role: "system",
                     content: `You are a financial categorization expert. Respond with a json array of categories matching the input merchants.
-                              Use only these categories: ${categories.join(', ')}
+                              Use only these categories: ${CATEGORIES.join(', ')}
                               Format: "[{ Merchant1:Category1}, {Merchant2:Category2}, ...]"`
                 },
                 {
@@ -188,22 +172,22 @@ class EnhancedTransactionCategorizer {
             const responseContent = response.choices[0].message.content.trim();
             const responseJson = JSON.parse(responseContent);
 
-            const categoryMap = new Map<string, { category: string, confidence: number, method: string }>();
+            const categoryMap = new Map<string, { category: string, confidence: number, method: CategorizationMethod }>();
 
             responseJson.forEach((mapping: Record<string, string>) => {
                 const [[merchant, category]] = Object.entries(mapping);
 
-                if (merchant && category && categories.includes(category)) {
+                if (merchant && category && CATEGORIES.includes(category as Categories)) {
                     categoryMap.set(merchant, {
                         category,
                         confidence: 0.7,
-                        method: 'ai_batch'
+                        method: CategorizationMethod.AI_BATCH
                     });
                 } else {
                     categoryMap.set(merchant, {
                         category: 'other',
                         confidence: 0.1,
-                        method: 'ai_batch_error'
+                        method: CategorizationMethod.AI_BATCH_ERROR
                     });
                 }
             });
@@ -212,80 +196,15 @@ class EnhancedTransactionCategorizer {
         } catch (error) {
             console.error('Error in batch AI categorization:', error);
             
-            // Fallback: assign 'other' to all unmatched merchants
-            const fallbackMap = new Map<string, { category: string, confidence: number, method: string }>();
+            const fallbackMap = new Map<string, { category: string, confidence: number, method: CategorizationMethod }>();
             for (const merchant of merchants) {
                 fallbackMap.set(merchant, {
                     category: 'other',
                     confidence: 0.1,
-                    method: 'ai_batch_error'
+                    method: CategorizationMethod.AI_BATCH_ERROR
                 });
             }
             return fallbackMap;
         }
     }
-
-    // Optional: Add method to add patterns manually
-    addPattern(pattern: TransactionPattern): void {
-        this.patterns.push(pattern);
-    }
 }
-
-// Example usage
-// async function exampleUsage(WebLLM: LLMClient) {
-//     const categorizer = new EnhancedTransactionCategorizer(WebLLM);
-
-//     // Add manual merchant mappings
-//     const mappings: MerchantMapping[] = [
-//         {
-//             merchant: "CASA AMETLLER",
-//             category: "food",
-//             confidence: 1.0,
-//             aliases: ["AMETLLER ORIGEN", "CASA AMETLLER S.L."]
-//         },
-//         {
-//             merchant: "Som Energia, SCCL",
-//             category: "utilities",
-//             confidence: 1.0,
-//             aliases: ["SOM ENERGIA", "SOM ENERGIA SCCL"]
-//         }
-//     ];
-
-//     // Import mappings
-//     const importResults = categorizer.bulkImportCategories(mappings);
-
-//     // Add a manual pattern
-//     categorizer.addPattern({
-//         pattern: "energia",
-//         category: "utilities",
-//         confidence: 0.9,
-//         isRegex: false
-//     });
-
-//     // Example transactions
-//     const transactions: Transaction[] = [
-//         {
-//             description: "CASA AMETLLER",
-//             amount: 42.50,
-//             date: new Date()
-//         },
-//         {
-//             description: "Som Energia, SCCL",
-//             amount: 75.20,
-//             date: new Date()
-//         }
-//     ];
-
-//     // Categorize transactions
-//     const categorizedTransactions = await categorizer.bulkCategorize(transactions);
-//     console.log('Categorized Transactions:', categorizedTransactions);
-// }
-
-export {
-    EnhancedTransactionCategorizer
-};
-export type {
-    Transaction,
-    MerchantMapping,
-    TransactionPattern
-};

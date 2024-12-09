@@ -1,5 +1,6 @@
 import { Transaction } from "@/domain/models/Transaction/Transaction";
-import { LLMChatMessage, LLMResponse } from "@/lib/LLM/WebLLMManager";
+import { LLMChatMessage } from "./LLM/types";
+import { LLMResponse } from "./LLM/types";
 
 export enum TransactionEvents {
     TransactionsParsed = "TransactionsParsedEvent",

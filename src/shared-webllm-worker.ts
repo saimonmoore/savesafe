@@ -3,7 +3,7 @@ import {
   ChatCompletionMessage,
   WebWorkerMLCEngineHandler,
 } from "@mlc-ai/web-llm";
-import { LLMResponse } from "@/lib/LLM/WebLLMManager";
+import { LLMResponse } from "./lib/LLM/types";
 import {
   EventManager,
   LLMEvents,

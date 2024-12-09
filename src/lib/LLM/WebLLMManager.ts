@@ -6,21 +6,7 @@ import {
   ResponseFormat
 } from "@mlc-ai/web-llm";
 import { LLMEvents, LLMMessageEventPayload, LLMResponseEventPayload, MessageChannelEvents } from "../Event";
-
-export interface LLMResponse {
-  requestId: string,
-  choices: {
-    message: {
-      content: string;
-    };
-  }[];
-}
-
-export type LLMChatMessage = { role: string, content: string };
-
-export interface LLMClient {
-  generateResponse(messages: LLMChatMessage[]): Promise<LLMResponse>;
-}
+import { LLMChatMessage, LLMClient, LLMResponse } from "./types";
 
 interface LLMlifecycle {
   onModelLoading: (progress: number, text?: string) => void;

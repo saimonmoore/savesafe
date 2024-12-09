@@ -1,19 +1,9 @@
 import { LLMEvents, LLMMessageEventPayload } from "@/lib/Event";
 import { TransactionParserError } from "@/lib/TransactionParser/errors";
-
-export interface LLMResponse {
-  requestId: string;
-  choices: {
-    message: {
-      content: string;
-    };
-  }[];
-}
-
-export type LLMChatMessage = { role: string; content: string };
+import { LLMChatMessage, LLMResponse, LLMWorkerClient } from "./types";
 
 // This class is designed to be used in a worker thread.
-export class WorkerLLMManager {
+export class WorkerLLMManager implements LLMWorkerClient {
   private static instance: WorkerLLMManager;
   private llmPort: MessagePort | null = null;
 
