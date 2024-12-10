@@ -18,5 +18,6 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  }
+  },
+  assetsInclude: ["src/db/migrations/**/*.sql"],
 })
