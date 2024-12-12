@@ -1,4 +1,4 @@
-import v0000 from "../db/migrations/0000_silky_prodigy.sql?raw";
+import v0000 from "../db/migrations/0000_cold_gladiator.sql?raw";
 
 import type { PGlite } from "@electric-sql/pglite";
 import { Data, Effect } from "effect";

@@ -1,5 +1,5 @@
 {
-  "id": "ca913d4b-6cd0-4c3f-93c7-0a8625fa719e",
+  "id": "8664fa5d-4f94-44d7-ba03-766edefe90b9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -47,7 +47,7 @@
         },
         "category": {
           "name": "category",
-          "type": "categories",
+          "type": "category",
           "typeSchema": "savesafe",
           "primaryKey": false,
           "notNull": true
@@ -293,8 +293,8 @@
     }
   },
   "enums": {
-    "savesafe.categories": {
-      "name": "categories",
+    "savesafe.category": {
+      "name": "category",
       "schema": "savesafe",
       "values": [
         "housing",

@@ -7,8 +7,8 @@ export const AppQueries = function* () {
   const { query } = yield* Pglite;
 
   return {
-    getSystem: query((_) => _.select().from(appTable)).pipe(
-      singleResult(() => new ReadApiError({ cause: "System not found" }))
+    getApp: query((_) => _.select().from(appTable)).pipe(
+      singleResult(() => new ReadApiError({ cause: "DB App not found" }))
     ),
   };
 };

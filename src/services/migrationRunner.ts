@@ -9,11 +9,13 @@ export const runMigrations = Effect.gen(function* () {
   const api = yield* WriteApi;
 
   const latestMigration = migrations.length;
-  const { version } = yield* readApi.getSystem.pipe(
+  const { version } = yield* readApi.getApp.pipe(
     Effect.catchTags({
       PgliteError: () => Effect.succeed({ version: 0 }), // No db yet
     })
   );
+
+  console.log("app version", version);
 
   // Make this step reversible, they must both complete, or none (`acquireRelease`)
   yield* Effect.all(migrations.slice(version));

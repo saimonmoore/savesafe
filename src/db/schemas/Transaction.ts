@@ -3,7 +3,6 @@ import { timestamps } from "./column.helpers";
 import { dbSchema } from "./schema";
 import * as t from "drizzle-orm/pg-core";
 
-
 export enum CategorizationMethod {
     AI_BATCH = "ai_batch",
     AI_BATCH_ERROR = "ai_batch_error",

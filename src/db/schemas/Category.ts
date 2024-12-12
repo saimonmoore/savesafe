@@ -2,7 +2,7 @@ import { timestamps } from "./column.helpers";
 import { dbSchema } from "./schema";
 import * as t from "drizzle-orm/pg-core";
 
-export enum Categories {
+export enum Category {
     Housing = "housing",
     Utilities = "utilities",
     Food = "food",
@@ -18,8 +18,8 @@ export enum Categories {
 }
 
 export const categoriesEnum = dbSchema.enum(
-  "categories",
-  Object.values(Categories) as [string, ...string[]]
+  "category",
+  Object.values(Category) as [string, ...string[]]
 );
 
 export const categoryTable = dbSchema.table(

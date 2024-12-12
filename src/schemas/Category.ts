@@ -1,9 +1,9 @@
 import { Schema } from "effect";
-import { Categories } from "@/db/schemas/Category";
+import { Category } from "@/db/schemas/Category";
 import { PrimaryKeyIndex } from "./shared";
 
 export const CategoryValue = Schema.Literal(
-  ...Object.values(Categories) as [Categories, ...Categories[]]
+  ...Object.values(Category) as [Category, ...Category[]]
 );
 export const OptionalCategoryValue = Schema.UndefinedOr(CategoryValue);
 

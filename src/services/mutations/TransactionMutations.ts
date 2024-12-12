@@ -1,6 +1,6 @@
 import { flow } from "effect";
 import { Pglite } from "@/services/pglite";
-import { TransactionInsert } from "@/schemas/Transaction";
+import { TransactionBatchInsert, TransactionInsert } from "@/schemas/Transaction";
 import { transactionTable } from "@/db/schemas/Transaction";
 import { singleResult } from "@/lib/utils";
 import { execute, WriteApiError } from "@/services/writeApi";
@@ -22,10 +22,10 @@ export const TransactionMutations = function* () {
       )
     ),
     createTransactions: flow(
-      execute(TransactionInsert, (values) =>
+      execute(TransactionBatchInsert, (values) =>
         query((_) =>
           _.insert(transactionTable)
-            .values(values)
+            .values([...values])
         )
       ),
     ),

@@ -1,6 +1,6 @@
 CREATE SCHEMA "savesafe";
 --> statement-breakpoint
-CREATE TYPE "savesafe"."categories" AS ENUM('housing', 'utilities', 'food', 'transport', 'technology', 'entertainment', 'finance', 'education', 'healthcare', 'shopping', 'telecommunications', 'other');--> statement-breakpoint
+CREATE TYPE "savesafe"."category" AS ENUM('housing', 'utilities', 'food', 'transport', 'technology', 'entertainment', 'finance', 'education', 'healthcare', 'shopping', 'telecommunications', 'other');--> statement-breakpoint
 CREATE TYPE "savesafe"."categorization_methods" AS ENUM('ai_batch', 'ai_batch_error', 'stored', 'pattern', 'fuzzy');--> statement-breakpoint
 CREATE TABLE "savesafe"."app" (
 	"version" integer DEFAULT 0 NOT NULL
@@ -8,7 +8,7 @@ CREATE TABLE "savesafe"."app" (
 --> statement-breakpoint
 CREATE TABLE "savesafe"."categories" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "savesafe"."categories_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"category" "savesafe"."categories" NOT NULL,
+	"category" "savesafe"."category" NOT NULL,
 	"updated_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"deleted_at" timestamp
