@@ -12,7 +12,7 @@ export const AppMutations = function* () {
       _.insert(appTable).values({ version: 0 }).returning()
     ).pipe(singleResult(() => new WriteApiError({ cause: "App not created" }))),
 
-    updateSystemVersion: execute(Schema.Positive, (version) =>
+    updateAppVersion: execute(Schema.Positive, (version) =>
       // Single row or multiple?
       query((_) => _.update(appTable).set({ version }))
     ),

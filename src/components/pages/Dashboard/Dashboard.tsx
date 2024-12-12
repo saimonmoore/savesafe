@@ -12,10 +12,15 @@ import {
 // import { BarChart } from "@/components/view/Charts/BarChart/BarChart";
 import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
 import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
+import { ErrorAlert } from "@/components/view/Error/ErrorAlert";
 import { FileUploader } from "@/components/view/FileUploader/FileUploader";
 import { Transaction } from "@/domain/models/Transaction/Transaction";
+import { useTransactions } from "@/hooks/use-transactions";
 import { TransactionProcessor } from "@/lib/TransactionProcessor/TransactionProcessor";
 import { useStore } from "@/stores";
+import { Match } from "effect";
+import { pipe } from "effect";
+import { Either } from "effect";
 import { DollarSign, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -74,6 +79,22 @@ export default function Dashboard() {
     // "application/x-prn": [".prn"],
     // "application/json": [".json"],
     // "application/pdf": [".pdf"]
+  }
+
+  const transactions = useTransactions();
+
+  if (Either.isLeft(transactions)) {
+    return pipe(
+      transactions.left,
+      Match.valueTags({
+        MissingData: () => (
+          <ErrorAlert message="No transactions found" />
+        ),
+        InvalidData: ({ parseError }) => (
+          <ErrorAlert message="Invalid data" error={parseError} />
+        ),
+      })
+    );
   }
 
   return (
@@ -157,31 +178,20 @@ export default function Dashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>2023-06-01</TableCell>
-                <TableCell>Grocery Store</TableCell>
-                <TableCell>Food</TableCell>
-                <TableCell className="text-right">-$85.43</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>2023-05-31</TableCell>
-                <TableCell>Salary Deposit</TableCell>
-                <TableCell>Income</TableCell>
-                <TableCell className="text-right text-green-600">
-                  $3,000.00
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>2023-05-30</TableCell>
-                <TableCell>Electric Bill</TableCell>
-                <TableCell>Utilities</TableCell>
-                <TableCell className="text-right">-$120.50</TableCell>
-              </TableRow>
+              {transactions.right.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>{transaction.transactionDate.toLocaleDateString()}</TableCell>
+                  <TableCell>{transaction.merchant}</TableCell>
+                  <TableCell>{transaction.category}</TableCell>
+                  <TableCell className="text-right">
+                    {transaction.amount.toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-
       <DonutChart />
       <StackedAreaChart />
     </div>
