@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { CategorizationMethod } from "@/db/schemas/Transaction";
 import { CategoryValue } from "@/schemas/Category";
-import { FloatQuantityInsert, OptionalDate, PrimaryKeyIndex } from "./shared";
+import { FloatQuantityInsert, OptionalPersistedDate, PersistedDateSchema, PrimaryKeyIndex } from "@/schemas/shared";
 
 export const CategorizationMethodSchema = Schema.Literal(
   ...(Object.values(CategorizationMethod) as [
@@ -14,8 +14,8 @@ export class TransactionInsert extends Schema.Class<TransactionInsert>(
   "TransactionInsert"
 )({
   merchant: Schema.NonEmptyString,
-  transactionDate: Schema.Date,
-  effectiveDate: OptionalDate,
+  transactionDate: PersistedDateSchema,
+  effectiveDate: OptionalPersistedDate,
   amount: FloatQuantityInsert,
   balance: FloatQuantityInsert,
   category: CategoryValue,
@@ -32,8 +32,8 @@ export class TransactionUpdate extends Schema.Class<TransactionUpdate>(
 )({
   id: PrimaryKeyIndex,
   merchant: Schema.NonEmptyString,
-  transactionDate: Schema.Date,
-  effectiveDate: OptionalDate,
+  transactionDate: PersistedDateSchema,
+  effectiveDate: OptionalPersistedDate,
   amount: FloatQuantityInsert,
   balance: FloatQuantityInsert,
   category: CategoryValue,
@@ -50,8 +50,8 @@ export class TransactionSelect extends Schema.Class<TransactionSelect>(
 )({
   id: PrimaryKeyIndex,
   merchant: Schema.NonEmptyString,
-  transactionDate: Schema.Date,
-  effectiveDate: OptionalDate,
+  transactionDate: PersistedDateSchema,
+  effectiveDate: OptionalPersistedDate,
   amount: FloatQuantityInsert,
   balance: FloatQuantityInsert,
   category: CategoryValue,
@@ -64,3 +64,5 @@ export class TransactionSelect extends Schema.Class<TransactionSelect>(
   createdAt: Schema.Date,
   updatedAt: Schema.Date,
 }) {}
+
+export const TransactionBatchInsert = Schema.Array(TransactionInsert);

@@ -1,5 +1,4 @@
-import { Categories } from "@/db/schemas/Category";
-import { Number, Schema } from "effect";
+import { Number, ParseResult, Schema } from "effect";
 
 export const FloatQuantityInsert = Schema.NonNegative.pipe(
   Schema.transform(Schema.NonNegative, {
@@ -7,8 +6,6 @@ export const FloatQuantityInsert = Schema.NonNegative.pipe(
     encode: (value) => Number.round(value * 10, 2),
   })
 );
-
-export const OptionalDate = Schema.UndefinedOr(Schema.Date);
 
 export const FloatQuantityOrUndefined = Schema.UndefinedOr(
   Schema.NonNegative
@@ -35,3 +32,16 @@ export const EmptyStringAsUndefined = Schema.UndefinedOr(Schema.String).pipe(
     encode: (value) => (value.trim().length === 0 ? undefined : value),
   })
 );
+
+export const PersistedDateSchema = Schema.String.pipe(
+  Schema.transform(
+    Schema.ValidDateFromSelf,
+    {
+      strict: true,
+      decode: (str: string) => new Date(str),
+      encode: (date: Date) => date.toISOString(),
+    }
+  )
+);
+
+export const OptionalPersistedDate = Schema.UndefinedOr(PersistedDateSchema);

@@ -21,5 +21,13 @@ export const TransactionMutations = function* () {
         () => new WriteApiError({ cause: "Transaction not created" })
       )
     ),
+    createTransactions: flow(
+      execute(TransactionInsert, (values) =>
+        query((_) =>
+          _.insert(transactionTable)
+            .values(values)
+        )
+      ),
+    ),
   };
 };
