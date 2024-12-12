@@ -61,8 +61,8 @@ export class TransactionSelect extends Schema.Class<TransactionSelect>(
     Schema.propertySignature,
     Schema.withConstructorDefault(() => false)
   ),
-  createdAt: Schema.Date,
-  updatedAt: Schema.Date,
+  createdAt: Schema.DateTimeUtc,
+  updatedAt: Schema.DateTimeUtc,
 }) {}
 
 export const TransactionBatchInsert = Schema.Array(TransactionInsert);

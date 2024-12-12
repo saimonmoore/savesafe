@@ -1,7 +1,7 @@
 import { Data, Effect, flow, Schema } from "effect";
 import { Pglite } from "@/services/pglite";
-import { TransactionMutations } from "./mutations/Transaction";
-import { AppMutations } from "./mutations/App";
+import { TransactionMutations } from "@/services/mutations/TransactionMutations";
+import { AppMutations } from "@/services/mutations/AppMutations";
 
 export class WriteApiError extends Data.TaggedError("WriteApiError")<{
   cause: unknown;

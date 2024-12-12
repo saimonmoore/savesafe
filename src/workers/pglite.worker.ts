@@ -6,7 +6,7 @@ import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 worker({
   async init(options) {
     const meta = options.meta
-    meta.logger.info('PGlite worker initialized');
+    console.log('PGlite worker initialized');
     // Do something with additional metadata.
     // or even run your own code in the leader along side the PGlite
     const pg = new PGlite({
