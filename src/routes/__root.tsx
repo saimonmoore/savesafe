@@ -9,7 +9,6 @@ import AuthenticatedLayout from "@/components/layouts/Authenticated";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ErrorAlert } from "@/components/view/Error/ErrorAlert";
 
-import "../App.css";
 import { ErrorBoundary } from "@/components/view/Error/ErrorBoundary";
 import { Effect } from "effect";
 
