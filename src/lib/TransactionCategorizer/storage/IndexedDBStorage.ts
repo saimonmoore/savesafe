@@ -22,7 +22,7 @@ export class IndexedDBStorage implements StorageBackend {
       const db = (event.target as IDBOpenDBRequest).result;
       db.createObjectStore('merchantMappings', { keyPath: 'merchant' });
       db.createObjectStore('patterns', { keyPath: 'pattern' });
-      db.createObjectStore('similarityCache');
+      db.createObjectStore('similarityCache', { keyPath: 'merchant' });
     };
 
     request.onsuccess = (event) => {
@@ -102,6 +102,7 @@ export class IndexedDBStorage implements StorageBackend {
   async saveSimilarityCache(cache: Record<string, [string, number][]>): Promise<void> {
     return new Promise((resolve, reject) => {
       const store = this.getObjectStore('similarityCache', 'readwrite');
+      console.log('[IndexedDBStorage#saveSimilarityCache] ==============> cache: ', { cache, entries: Object.entries(cache) });
       Object.entries(cache).forEach(([key, value]) => store.put({ key, value }));
 
       store.transaction.oncomplete = () => resolve();

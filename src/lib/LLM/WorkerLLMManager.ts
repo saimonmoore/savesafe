@@ -82,13 +82,14 @@ export class WorkerLLMManager implements LLMWorkerClient {
           messages,
         };
 
+        console.log('[WorkerLLMManager#requestInference] ==============> request: ', { request });
         this.llmPort?.postMessage(request);
       }),
       new Promise((_, reject) =>
         setTimeout(
           () =>
             reject(new Error("[WorkerLLMManager] Inference request timed out")),
-          60000
+          120000
         )
       ),
     ]);

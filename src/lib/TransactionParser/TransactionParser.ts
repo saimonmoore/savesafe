@@ -8,6 +8,7 @@ import { CSVHeaderParser } from "@/lib/CSVHeaderParser/CSVHeaderParser";
 
 import type { RawTransaction } from "@/domain/models/Transaction/Transaction";
 import { EventManager, UploadEventPayload } from "@/lib/Event";
+import { EnhancedTransactionCategorizer } from "../TransactionCategorizer/TransactionCategorizer";
 
 interface CSVMapping {
   delimiter: string;
@@ -21,9 +22,11 @@ interface CSVMapping {
 class TransactionParser {
   private mappingPatterns: Map<string, CSVMapping> = new Map();
   private csvHeaderParser: CSVHeaderParser;
+  private transactionCategorizer: EnhancedTransactionCategorizer;
 
   constructor() {
     this.csvHeaderParser = new CSVHeaderParser();
+    this.transactionCategorizer = new EnhancedTransactionCategorizer();
   }
 
   public async handleWorkerMessage(
@@ -33,7 +36,10 @@ class TransactionParser {
     let transactions: Transaction[] = [];
     try {
       transactions = await this.parseTransactions(files);
-      postMessage(EventManager.transactionsParsedEvent(transactions));
+      console.log('[TransactionParser#handleWorkerMessage] ==============> transactions: ', { transactions });
+      const categorizedTransactions = await this.transactionCategorizer.bulkCategorize(transactions);
+      console.log('[TransactionParser#handleWorkerMessage] ==============> categorizedTransactions: ', { categorizedTransactions });
+      postMessage(EventManager.transactionsParsedEvent(categorizedTransactions));
     } catch (error: unknown) {
       console.error("Error parsing transactions:", error);
 
