@@ -5,8 +5,9 @@ import {
   ChatCompletionMessageParam,
   ResponseFormat
 } from "@mlc-ai/web-llm";
-import { LLMEvents, LLMMessageEventPayload, LLMResponseEventPayload, MessageChannelEvents } from "../Event";
+import { LLMEvents, LLMMessageEventPayload, LLMResponseEventPayload, MessageChannelEvents } from "@/lib/Event";
 import { LLMChatMessage, LLMClient, LLMResponse } from "./types";
+import { SUPPORTED_MODELS } from "@/config";
 
 interface LLMlifecycle {
   onModelLoading: (progress: number, text?: string) => void;
@@ -14,16 +15,12 @@ interface LLMlifecycle {
   onModelError: (error: Error) => void;
 }
 
-enum SUPPORTED_MODELS {
-  "QWEN" = "Qwen2.5-7B-Instruct-q4f32_1-MLC",
-  "LLAMA" = "Llama-3.1-8B-Instruct-q4f32_1-MLC"
-};
 
 // This class is designed to be used in the main thread.
 export class WebLLMManager implements LLMClient {
   private static instance: WebLLMManager;
   private engine: MLCEngineInterface | null = null;
-  public selectedModel: string = SUPPORTED_MODELS.QWEN;
+  public selectedModel: string = SUPPORTED_MODELS.QWEN257b;
   private lifecycleCallback: LLMlifecycle | null = null;
   public worker: Worker | ServiceWorker | null = null;
   private connectedPorts: Set<MessagePort> = new Set();

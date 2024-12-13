@@ -20,6 +20,7 @@ interface CSVMapping {
 }
 
 class TransactionParser {
+  private CATEGORIZE_BATCH_SIZE = 20;
   private mappingPatterns: Map<string, CSVMapping> = new Map();
   private csvHeaderParser: CSVHeaderParser;
   private transactionCategorizer: EnhancedTransactionCategorizer;
@@ -36,10 +37,19 @@ class TransactionParser {
     let transactions: Transaction[] = [];
     try {
       transactions = await this.parseTransactions(files);
-      console.log('[TransactionParser#handleWorkerMessage] ==============> transactions: ', { transactions });
-      const categorizedTransactions = await this.transactionCategorizer.bulkCategorize(transactions);
-      console.log('[TransactionParser#handleWorkerMessage] ==============> categorizedTransactions: ', { categorizedTransactions });
-      postMessage(EventManager.transactionsParsedEvent(categorizedTransactions));
+      console.log(
+        "[TransactionParser#handleWorkerMessage] ==============> transactions: ",
+        { transactions }
+      );
+      const categorizedTransactions =
+        await this.categorizeTransactionsInBatches(transactions);
+      console.log(
+        "[TransactionParser#handleWorkerMessage] ==============> categorizedTransactions: ",
+        { categorizedTransactions }
+      );
+      postMessage(
+        EventManager.transactionsParsedEvent(categorizedTransactions)
+      );
     } catch (error: unknown) {
       console.error("Error parsing transactions:", error);
 
@@ -47,6 +57,40 @@ class TransactionParser {
         postMessage(EventManager.transactionParsingErrorEvent(error));
       }
     }
+  }
+
+  private async categorizeTransactionsInBatches(
+    transactions: Transaction[]
+  ): Promise<Transaction[]> {
+    const categorizedTransactions: Transaction[] = [];
+
+    const batchPromises = [];
+    console.log(
+      "[TransactionParser#categorizeTransactionsInBatches] ==============> transactions: ",
+      { transactionsLength: transactions.length }
+    );
+    for (let i = 0; i < transactions.length; i += this.CATEGORIZE_BATCH_SIZE) {
+      const batch = transactions.slice(i, i + this.CATEGORIZE_BATCH_SIZE);
+      batchPromises.push(
+        await this.transactionCategorizer.bulkCategorize(batch)
+      );
+      console.log(
+        "[TransactionParser#categorizeTransactionsInBatches] ==============> batch: ",
+        { batch: batchPromises.length }
+      );
+    }
+
+    const results = await Promise.all(batchPromises);
+    console.log(
+      "[TransactionParser#categorizeTransactionsInBatches] ==============> all settled: ",
+      { results }
+    );
+
+    batchPromises.forEach((result) => {
+      categorizedTransactions.push(...result);
+    });
+
+    return categorizedTransactions;
   }
 
   private async getHeadersFromAI(lines: string[]): Promise<string> {
@@ -205,10 +249,13 @@ class TransactionParser {
 
       const mapping = this.getMapping(headers, delimiter);
 
-      const headerIndexMap = headers.reduce((acc, header, index) => {
-        acc[this.standardizeHeader(header)] = index;
-        return acc;
-      }, {} as Record<string, number>);
+      const headerIndexMap = headers.reduce(
+        (acc, header, index) => {
+          acc[this.standardizeHeader(header)] = index;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       // Skip any lines before the headersString
       const headerLineIndex = lines.findIndex((line) =>

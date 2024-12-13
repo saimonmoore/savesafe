@@ -1,0 +1,376 @@
+You are a financial categorization expert. Respond only with a json array of categories matching the input merchants. Use only these categories: housing, utilities, public transport, car, fuel, parking, groceries, eating out, telecommunications, internet, finance, bank costs, common account, taxation, fines, education, school material, children's activities, activities, healthcare, shopping, entertainment, holidays, gifts, subscriptions, miscellaneous. Format: '[{ Merchant1:{ category: Category1, confidence: Confidence1}}, { Merchant2:{ category: Category2, confidence: Confidence2}}, ...]'. Categorize these transactions merchants: RECIBO /Som Energia, SCCL, RECIBO /PROMOCIO SOCIAL URBANA, COM. USO REDES INTERNACION., BACKBLAZE.COM, RECIBO VISA CLASICA, BAR CENTRE CATOLIC, RUSTCO RUBIO I ORS, LA TABERNA DE LA RAMBLA, CASA AMETLLER, PUNJAB 2019 CATALUNYA, RECIBO /IN PRO PAT 28 S.L., PAGO BIZUM A Gemma, GUARDIAN NEWS & MEDIA, PAGO BIZUM A Eulalia, CLUBER, PIRINEU EN BOCA, AUTOPISTA PEREZ, EROICA CAFFE, CAPRABO 7766, CAPRABO CORNELLA, RECIBO /Som Connexio SCCL, AENA AEROPUERTOS, EL RACO DE LA SALUT, COMIS. MANT., VOL.VALLDENURIA, EL SAYOL, RESTAURANTE HOTEL NURIA, BAR NURIA, FORN ST.MIQUEL, VIVARI VIC, ES RONDA 15, FORN RUSTIC SL, FERRETERIA CORNELLA, ABACUS CORNELLA, MICROSOFT*1 MES DE ULTIMA, PARC ESPORTIU LLOBREGAT, AURGI CORNELLA, APPLUS ITEUVE CORNELLA, TRANSF INTERNA /SIMON MOORE, CAIXAFORUM, ROSTISSERIA EL POLLO CON, APPLE.COM/BILL, CONDIS CORNELLA DE LLOBRE, BITWARDEN, AMAZON PRIME*H049R6XG4, TRANSF OTR /Ramon Barcons S.L., MERCADONA CAMP DE L ESPAN, RECIB /AJUNTAMENT CORNELLA-ENS, ABACUS HOSPITALET
+
+
+// groq: llama3-8b-8192
+```json
+{
+   "RECIBO /Som Energia": { "category": "utilities", "confidence": 0.9 },
+   "SCCL": { "category": "common account", "confidence": 0.8 },
+   "RECIBO /PROMOCIO SOCIAL URBANA": { "category": "housing", "confidence": 0.8 },
+   "COM. USO REDES INTERNACION.": { "category": "utilities", "confidence": 0.9 },
+   "BACKBLAZE.COM": { "category": "internet", "confidence": 0.9 },
+   "RECIBO VISA CLASICA": { "category": "bank costs", "confidence": 0.9 },
+   "BAR CENTRE CATOLIC": { "category": "eating out", "confidence": 0.7 },
+   "RUSTCO RUBIO I ORS": { "category": "groceries", "confidence": 0.8 },
+   "LA TABERNA DE LA RAMBLA": { "category": "eating out", "confidence": 0.7 },
+   "CASA AMETLLER": { "category": "housing", "confidence": 0.8 },
+   "PUNJAB 2019 CATALUNYA": { "category": "activities", "confidence": 0.6 },
+   "RECIBO /IN PRO PAT 28 S.L.": { "category": "finance", "confidence": 0.9 },
+   "PAGO BIZUM A Gemma": { "category": "bank costs", "confidence": 0.9 },
+   "GUARDIAN NEWS & MEDIA": { "category": "subscriptions", "confidence": 0.8 },
+   "PAGO BIZUM A Eulalia": { "category": "bank costs", "confidence": 0.9 },
+   "CLUBER": { "category": "activities", "confidence": 0.6 },
+   "PIRINEU EN BOCA": { "category": "eating out", "confidence": 0.7 },
+   "AUTOPISTA PEREZ": { "category": "public transport", "confidence": 0.8 },
+   "EROICA CAFFE": { "category": "eating out", "confidence": 0.7 },
+   "CAPRABO 7766": { "category": "groceries", "confidence": 0.8 },
+   "CAPRABO CORNELLA": { "category": "groceries", "confidence": 0.8 },
+   "RECIBO /Som Connexio SCCL": { "category": "telecommunications", "confidence": 0.9 },
+   "AENA AEROPUERTOS": { "category": "transportation", "confidence": 0.8 },
+   "EL RACO DE LA SALUT": { "category": "healthcare", "confidence": 0.7 },
+   "COMIS. MANT.": { "category": "shopping", "confidence": 0.7 },
+   "VOL.VALLDENURIA": { "category": "entertainment", "confidence": 0.6 },
+   "EL SAYOL": { "category": "eating out", "confidence": 0.7 },
+   "RESTAURANTE HOTEL NURIA": { "category": "eating out", "confidence": 0.7 },
+   "BAR NURIA": { "category": "eating out", "confidence": 0.7 },
+   "FORN ST.MIQUEL": { "category": "groceries", "confidence": 0.8 },
+   "VIVARI VIC": { "category": "entertainment", "confidence": 0.6 },
+   "ES RONDA 15": { "category": "entertainment", "confidence": 0.6 },
+   "FORN RUSTIC SL": { "category": "groceries", "confidence": 0.8 },
+   "FERRETERIA CORNELLA": { "category": "shopping", "confidence": 0.7 },
+   "ABACUS CORNELLA": { "category": "common account", "confidence": 0.8 },
+   "MICROSOFT*1 MES DE ULTIMA": { "category": "subscriptions", "confidence": 0.8 },
+   "PARC ESPORTIU LLOBREGAT": { "category": "activities", "confidence": 0.6 },
+   "AURGI CORNELLA": { "category": "shopping", "confidence": 0.7 },
+   "APPLUS ITEUVE CORNELLA": { "category": "shopping", "confidence": 0.7 },
+   "TRANSF INTERNA /SIMON MOORE": { "category": "bank costs", "confidence": 0.9 },
+   "CAIXAFORUM": { "category": "common account", "confidence": 0.8 },
+   "ROSTISSERIA EL POLLO CON": { "category": "groceries", "confidence": 0.8 },
+   "APPLE.COM/BILL": { "category": "internet", "confidence": 0.9 },
+   "CONDIS CORNELLA DE LLOBRE": { "category": "healthcare", "confidence": 0.7 },
+   "BITWARDEN": { "category": "subscriptions", "confidence": 0.8 },
+   "AMAZON PRIME*H049R6XG4": { "category": "subscriptions", "confidence": 0.8 },
+   "TRANSF OTR /Ramon Barcons S.L.": { "category": "bank costs", "confidence": 0.9 },
+   "MERCADONA CAMP DE L ESPAN": { "category": "groceries", "confidence": 0.8 },
+   "RECIB /AJUNTAMENT CORNELLA-ENS": { "category": "taxation", "confidence": 0.8 },
+   "ABACUS HOSPITALET": { "category": "common account", "confidence": 0.8 }
+}
+```
+
+// mixtral-8x7b-32768
+```json
+[
+    {
+        "RECIBO /Som Energia, SCCL": {
+            "category": "utilities",
+            "confidence": 0.9
+        }
+    },
+    {
+        "RECIPROCAL SOCIAL URBANA, COM. USO REDES INTERNACION.": {
+            "category": "internet",
+            "confidence": 0.8
+        }
+    },
+    {
+        "BACKBLAZE.COM": {
+            "category": "finance",
+            "confidence": 0.7
+        }
+    },
+    {
+        "RECIBO VISA CLASICA": {
+            "category": "finance",
+            "confidence": 0.9
+        }
+    },
+    {
+        "BAR CENTRE CATOLIC": {
+            "category": "eating out",
+            "confidence": 0.8
+        }
+    },
+    {
+        "RUSTCO RUBIO I ORS": {
+            "category": "grocery",
+            "confidence": 0.7
+        }
+    },
+    {
+        "LA TABERNA DE LA RAMBLA": {
+            "category": "eating out",
+            "confidence": 0.9
+        }
+    },
+    {
+        "CASA AMETLLER": {
+            "category": "grocery",
+            "confidence": 0.8
+        }
+    },
+    {
+        "PUNJAB 2019 CATALUNYA": {
+            "category": "eating out",
+            "confidence": 0.8
+        }
+    },
+    {
+        "RECIBO /IN PRO PAT 28 S.L.": {
+            "category": "education",
+            "confidence": 0.7
+        }
+    },
+    {
+        "PAGO BIZUM A Gemma": {
+            "category": "miscellaneous",
+            "confidence": 0.6
+        }
+    },
+    {
+        "GUARDIAN NEWS & MEDIA": {
+            "category": "subscription",
+            "confidence": 0.8
+        }
+    },
+    {
+        "PAGO BIZUM A Eulalia": {
+            "category": "miscellaneous",
+            "confidence": 0.6
+        }
+    },
+    {
+        "CLUBER": {
+            "category": "shopping",
+            "confidence": 0.7
+        }
+    },
+    {
+        "PIRINEU EN BOCA": {
+            "category": "activities",
+            "confidence": 0.8
+        }
+    },
+    {
+        "AUTOPISTA PEREZ": {
+            "category": "car",
+            "confidence": 0.7
+        }
+    },
+    {
+        "EROICA CAFFE": {
+            "category": "eating out",
+            "confidence": 0.8
+        }
+    },
+    {
+        "CAPRABO 7766": {
+            "category": "grocery",
+            "confidence": 0.9
+        }
+    },
+    {
+        "CAPRABO CORNELLA": {
+            "category": "grocery",
+            "confidence": 0.9
+        }
+    },
+    {
+        "RECIBO /Som Connexio SCCL": {
+            "category": "internet",
+            "confidence": 0.8
+        }
+    },
+    {
+        "AENA AEROPUERTOS": {
+            "category": "transport",
+            "confidence": 0.7
+        }
+    },
+    {
+        "RESTAURANTE HOTEL NURIA": {
+            "category": "eating out",
+            "confidence": 0.9
+        }
+    },
+    {
+        "BAR NURIA": {
+            "category": "eating out",
+            "confidence": 0.8
+        }
+    },
+    {
+        "FORN ST.MIQUEL": {
+            "category": "grocery",
+            "confidence": 0.7
+        }
+    },
+    {
+        "VIVARI VIC": {
+            "category": "grocery",
+            "confidence": 0.7
+        }
+    },
+    {
+        "ES RONDA 15": {
+            "category": "shopping",
+            "confidence": 0.6
+        }
+    },
+    {
+        "FORN RUSTIC SL": {
+            "category": "grocery",
+            "confidence": 0.7
+        }
+    },
+    {
+        "FERRETERIA CORNELLA": {
+            "category": "home improvement",
+            "confidence": 0.8
+        }
+    },
+    {
+        "ABACUS CORNELLA": {
+            "category": "education",
+            "confidence": 0.7
+        }
+    },
+    {
+        "MICROSOFT*1 MES DE ULTIMA": {
+            "category": "software",
+            "confidence": 0.8
+        }
+    },
+    {
+        "PARC ESPORTIU LLOBREGAT": {
+            "category": "activities",
+            "confidence": 0.9
+        }
+    },
+    {
+        "AURGI CORNELLA": {
+            "category": "healthcare",
+            "confidence": 0.8
+        }
+    },
+    {
+        "APPLUS ITEUVE CORNELLA": {
+            "category": "miscellaneous",
+            "confidence": 0.6
+        }
+    },
+    {
+        "TRANSF INTERNA /SIMON MOORE": {
+            "category": "finance",
+            "confidence": 0.7
+        }
+    },
+    {
+        "CAIXAFORUM": {
+            "category": "education",
+            "confidence": 0.7
+        }
+    },
+    {
+        "ROSTISSERIA EL POLLO CON": {
+            "category": "eating out",
+            "confidence": 0.8
+        }
+    },
+    {
+        "APPLE.COM/BILL": {
+            "category": "electronics",
+            "confidence": 0.8
+        }
+    },
+    {
+        "CONDIS CORNELLA DE LLOBRE": {
+            "category": "grocery",
+            "confidence": 0.9
+        }
+    },
+    {
+        "BITWARDEN": {
+            "category": "software",
+            "confidence": 0.8
+        }
+    },
+    {
+        "AMAZON PRIME*H049R6XG4": {
+            "category": "shopping",
+            "confidence": 0.8
+        }
+    },
+    {
+        "MERCADONA CAMP DE L ESPAN": {
+            "category": "grocery",
+            "confidence": 0.9
+        }
+    },
+    {
+        "RECIB /AJUNTAMENT CORNELLA-ENS": {
+            "category": "taxation",
+            "confidence": 0.7
+        }
+    },
+    {
+        "ABACUS HOSPITALET": {
+            "category": "education",
+            "confidence": 0.7
+        }
+    }
+]
+```
+
+// gemma2-9b-it
+```json
+[
+    { "RECI/Som Energia": { "category": "utilities", "confidence": 0.9 }, 
+    "RECI/PROMOCIO SOCIAL URBANA": { "category": "housing", "confidence": 0.8 }, 
+    "COM. USO REDES INTERNACION.": { "category": "telecommunications", "confidence": 0.9 }, 
+    "BACKBLAZE.COM": { "category": "subscriptions", "confidence": 0.8 }, 
+    "RECI VISA CLASICA": { "category": "bank costs", "confidence": 0.9 },
+    "BAR CENTRE CATOLIC": { "category": "eating out", "confidence": 0.9 }, 
+    "RUSTCO RUBIO I ORS": { "category": "fuel", "confidence": 0.85 }, 
+    "LA TABERNA DE LA RAMBLA": { "category": "eating out", "confidence": 0.85 },
+    "CASA AMETLLER": { "category": "car", "confidence": 0.8 }, 
+    "PUNJAB 2019 CATALUNYA": { "category": "children's activities", "confidence": 0.9 },
+    "RECI/IN PRO PAT 28 S.L.": { "category": "public transport", "confidence": 0.8 }, 
+    "PAGO BIZUM A Gemma": { "category": "miscellaneous", "confidence": 0.7 }, 
+    "GUARDIAN NEWS & MEDIA": { "category": "subscriptions", "confidence": 0.9 },
+    "PAGO BIZUM A Eulalia": { "category": "miscellaneous", "confidence": 0.7 }, 
+    "CLUBER": { "category": "entertainment", "confidence": 0.9 }, 
+    "PIRINEU EN BOCA": { "category": "activities", "confidence": 0.85 },
+    "AUTOPISTA PEREZ": { "category": "car", "confidence": 0.9 }, 
+    "EROICA CAFFE": { "category": "eating out", "confidence": 0.9 }, 
+    "CAPRABO 7766": { "category": "car", "confidence": 0.85 }, 
+    "CAPRABO CORNELLA": { "category": "car", "confidence": 0.85 }, 
+    "RECI/Som Connexio SCCL": { "category": "utilities", "confidence": 0.9 }, 
+    "AENA AEROPUERTOS": { "category": "holidays", "confidence": 0.9 }, 
+    "EL RACO DE LA SALUT": { "category": "healthcare", "confidence": 0.9 }, 
+    "COMIS. MANT., VOL.VALLDENURIA": { "category": "utilities", "confidence": 0.7 }, 
+    "EL SAYOL": { "category": "grceries", "confidence": 0.8 }, 
+    "RESTAURANTE HOTEL NURIA": { "category": "eating out", "confidence": 0.9 }, 
+    "BAR NURIA": { "category": "eating out", "confidence": 0.85 },
+    "FORN ST.MIQUEL": { "category": "groceries", "confidence": 0.95 },
+    "VIVARI VIC": { "category": "shopping", "confidence": 0.8 },
+    "ES RONDA 15": { "category": "public transport", "confidence": 0.8 },
+    "FORN RUSTIC SL": { "category": "groceries", "confidence": 0.9 }, 
+    "FERRETERIA CORNELLA": { "category": "shopping", "confidence": 0.9 }, 
+    "ABACUS CORNELLA": { "category": "shopping", "confidence": 0.85 }, 
+    "MICROSOFT*1 MES DE ULTIMA": { "category": "subscriptions", "confidence": 0.9 }, 
+    "PARC ESPORTIU LLOBREGAT": { "category": "activities", "confidence": 0.8 }, 
+    "AURGI CORNELLA": { "category": "car", "confidence": 0.8 }, 
+    "APPLUS ITEUVE CORNELLA": { "category": "car", "confidence": 0.8 }, 
+    "TRANSF INTERNA /SIMON MOORE": { "category": "miscellaneous", "confidence": 0.7 }, 
+    "CAIXAFORUM": { "category": "finance", "confidence": 0.9 }, 
+    "ROSTISSERIA EL POLLO CON": { "category": "eating out", "confidence": 0.8 },
+    "APPLE.COM/BILL": { "category": "subscriptions", "confidence": 0.9 },
+    "CONDIS CORNELLA DE LLOBRE": { "category": "groceries", "confidence": 0.9 }, 
+    "BITWARDEN": { "category": "subscriptions", "confidence": 0.8 },
+    "AMAZON PRIME*H049R6XG4": { "category": "subscriptions", "confidence": 0.9 }, 
+    "TRANSF OTR /Ramon Barcons S.L.": { "category": "miscellaneous", "confidence": 0.7 }, 
+    "MERCADONA CAMP DE L ESPAN": { "category": "groceries", "confidence": 0.9 },
+    "RECI/AJUNTAMENT CORNELLA-ENS": { "category": "taxation", "confidence": 0.9 },
+    "ABACUS HOSPITALET": { "category": "healthcare", "confidence": 0.9 }
+  ]
+```

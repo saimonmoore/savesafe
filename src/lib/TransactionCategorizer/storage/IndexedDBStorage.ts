@@ -22,7 +22,7 @@ export class IndexedDBStorage implements StorageBackend {
       const db = (event.target as IDBOpenDBRequest).result;
       db.createObjectStore('merchantMappings', { keyPath: 'merchant' });
       db.createObjectStore('patterns', { keyPath: 'pattern' });
-      db.createObjectStore('similarityCache', { keyPath: 'merchant' });
+      db.createObjectStore('similarityCache', { autoIncrement: true });
     };
 
     request.onsuccess = (event) => {

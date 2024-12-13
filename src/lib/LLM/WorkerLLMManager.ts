@@ -4,6 +4,7 @@ import { LLMChatMessage, LLMResponse, LLMWorkerClient } from "./types";
 
 // This class is designed to be used in a worker thread.
 export class WorkerLLMManager implements LLMWorkerClient {
+  private static MAX_INFERENCE_TIME = 200000;
   private static instance: WorkerLLMManager;
   private llmPort: MessagePort | null = null;
 
@@ -29,69 +30,83 @@ export class WorkerLLMManager implements LLMWorkerClient {
       throw new Error("[WorkerLLMManager] LLM port not set");
     }
 
-    return Promise.race<LLMResponse>([
-      new Promise<LLMResponse>((resolve, reject) => {
-        const requestId = crypto.randomUUID();
+    const requestId = crypto.randomUUID();
+    const abortController = new AbortController();
 
-        // Setup one-time response handler
-        const responseHandler = (event: MessageEvent) => {
-          if (
-            event.data.type === LLMEvents.LLMResponse &&
-            event.data.response.requestId === requestId
-          ) {
-            if (this.llmPort) {
-              this.llmPort.onmessage = null;
-              this.llmPort.onmessageerror = null;
-            }
+    const inferencePromise = new Promise<LLMResponse>((resolve, reject) => {
 
-            try {
-              const aiContent = JSON.parse(
-                event.data.response.choices[0].message.content
-              );
-
-              if ("error" in aiContent) {
-                reject(new TransactionParserError(aiContent.error));
-              } else {
-                // Ensure aiContent is of type LLMResponse
-                const response: LLMResponse = {
-                  requestId: requestId,
-                  choices: event.data.response.choices,
-                };
-                resolve(response);
-              }
-            } catch (error) {
-              console.error(
-                "[WorkerLLMManager#requestInference responseHandler] Error parsing LLMResponse: ",
-                { error }
-              );
-              reject(error);
-            }
+      // Setup one-time response handler
+      const responseHandler = (event: MessageEvent) => {
+        if (
+          event.data.type === LLMEvents.LLMResponse &&
+          event.data.response.requestId === requestId
+        ) {
+          if (this.llmPort) {
+            this.llmPort.onmessage = null;
+            this.llmPort.onmessageerror = null;
           }
-        };
 
-        if (this.llmPort) {
-          this.llmPort.onmessage = responseHandler;
-          this.llmPort.onmessageerror = (error) => {
+          try {
+            const aiContent = JSON.parse(
+              event.data.response.choices[0].message.content
+            );
+
+            if ("error" in aiContent) {
+              console.log('[WorkerLLMManager#requestInference responseHandler] ==============> error: ', { requestId, aiContent });
+              reject(new TransactionParserError(aiContent.error));
+            } else {
+              // Ensure aiContent is of type LLMResponse
+              const response: LLMResponse = {
+                requestId: requestId,
+                choices: event.data.response.choices,
+              };
+              console.log('[WorkerLLMManager#requestInference responseHandler] ==============> response: ', { requestId, response });
+              resolve(response);
+            }
+          } catch (error) {
+            console.error(
+              "[WorkerLLMManager#requestInference responseHandler] Error parsing LLMResponse: ",
+              { requestId, error }
+            );
             reject(error);
-          };
+          }
         }
+      };
 
-        const request: LLMMessageEventPayload = {
-          requestId,
-          type: LLMEvents.LLMMessage,
-          messages,
+      if (this.llmPort) {
+        this.llmPort.onmessage = responseHandler;
+        this.llmPort.onmessageerror = (error) => {
+          console.log('[WorkerLLMManager#requestInference] ==============> error: ', { requestId, error }); 
+          reject(error);
         };
+      }
 
-        console.log('[WorkerLLMManager#requestInference] ==============> request: ', { request });
-        this.llmPort?.postMessage(request);
-      }),
-      new Promise((_, reject) =>
-        setTimeout(
-          () =>
-            reject(new Error("[WorkerLLMManager] Inference request timed out")),
-          120000
-        )
-      ),
-    ]);
+      const request: LLMMessageEventPayload = {
+        requestId,
+        type: LLMEvents.LLMMessage,
+        messages,
+      };
+
+      console.log('[WorkerLLMManager#requestInference] ==============> request: ', { requestId, request });
+      this.llmPort?.postMessage(request);
+    });
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      const timeoutId = setTimeout(() => {
+        console.log('[WorkerLLMManager#requestInference] ==============> TIMEOUT: ', { requestId, timeoutId });
+        reject(new Error("[WorkerLLMManager] Inference request timed out"));
+      }, WorkerLLMManager.MAX_INFERENCE_TIME);
+
+      abortController.signal.addEventListener("abort", () => {
+        console.log('[WorkerLLMManager#requestInference] ==============> abort: ', { requestId, timeoutId });
+        clearTimeout(timeoutId);
+      });
+    });
+
+    const result = await Promise.race([inferencePromise, timeoutPromise]);
+    console.log('[WorkerLLMManager#requestInference] ==============> race result: ', { requestId, result });
+    abortController.abort(); // Cancel the timeout if inference completes
+
+    return result;
   }
 }
