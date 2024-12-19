@@ -8,78 +8,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { AreaChart } from "@/components/view/Charts/AreaChart/AreaChart";
-// import { BarChart } from "@/components/view/Charts/BarChart/BarChart";
 import { DonutChart } from "@/components/view/Charts/DonutChart/DonutChart";
 import { StackedAreaChart } from "@/components/view/Charts/StackedAreaChart/StackedAreaChart";
 import { ErrorAlert } from "@/components/view/Error/ErrorAlert";
 import { FileUploader } from "@/components/view/FileUploader/FileUploader";
-import { Transaction } from "@/domain/models/Transaction/Transaction";
 import { useTransactions } from "@/hooks/use-transactions";
-import { TransactionProcessor } from "@/lib/TransactionProcessor/TransactionProcessor";
 import { useStore } from "@/stores";
 import { Match } from "effect";
 import { pipe } from "effect";
 import { Either } from "effect";
 import { DollarSign, Loader2, TrendingDown, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
-
-function processTransactions(uploadedFiles: File[], setRawTransactions: (transactions: Transaction[]) => void) {
-  try {
-    TransactionProcessor.getInstance().process(uploadedFiles, setRawTransactions)
-  } catch (TransactionParserError) {
-    console.error("Error parsing transactions:", TransactionParserError);
-  }
-};
+import { useEffect } from "react";
+import { useMachine } from "@xstate/react";
+import { machine } from "@/machines/createTransactions";
 
 export default function Dashboard() {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
-  const [parsingTransactions, setParsingTransactions] = useState<boolean>(false)
-  const [rawTransactions, setRawTransactions] = useState<Transaction[]>([])
-
-  const {llmReady} = useStore(state => (state));
+  const [state, send] = useMachine(machine);
+  const { llmReady } = useStore((state) => state);
 
   const handleFilesUploaded = (files: File[]) => {
-    setUploadedFiles(files)
-  }
+    send({ type: "files.upload", files });
+  };
 
   useEffect(() => {
-    function processFiles() {
-      processTransactions(uploadedFiles, setRawTransactions);
-      setUploadedFiles([]);
+    if (state.matches("FilesProcessed")) {
+      console.log("Raw transactions:", state.context.rawTransactions);
+      send({
+        type: "transactions.create",
+        transactions: state.context.rawTransactions,
+      });
     }
-
-    if (uploadedFiles.length > 0) {
-      setParsingTransactions(true);
-      processFiles();
-    }
-
-  }, [uploadedFiles])
-
-  useEffect(() => {
-    console.log("Raw transactions:", rawTransactions)
-    if (rawTransactions.length > 0) {
-      setParsingTransactions(false);
-    }
-  }, [rawTransactions])
+  }, [state]);
 
   const MAX_FILES = 3;
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
   const SUPPORTED_FILE_TYPES = {
-    // "application/vnd.ms-excel": [".xls", ".xlt"],
-    // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-    // "application/vnd.openxmlformats-officedocument.spreadsheetml.template": [".xltx"],
-    // "application/vnd.ms-excel.addin.macroEnabled.12": [".xlam"],
-    // "application/vnd.ms-excel.sheet.binary.macroEnabled.12": [".xlsb"],
-    // "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
-    // "application/vnd.apple.numbers": [".numbers"],
-    // "application/vnd.lotus-1-2-3": [".wk1", ".wk3", ".wk4"],
     "text/csv": [".csv"],
-    // "text/tab-separated-values": [".tsv"],
-    // "application/x-prn": [".prn"],
-    // "application/json": [".json"],
-    // "application/pdf": [".pdf"]
-  }
+  };
 
   const transactions = useTransactions();
 
@@ -87,9 +52,7 @@ export default function Dashboard() {
     return pipe(
       transactions.left,
       Match.valueTags({
-        MissingData: () => (
-          <ErrorAlert message="No transactions found" />
-        ),
+        MissingData: () => <ErrorAlert message="No transactions found" />,
         InvalidData: ({ parseError }) => (
           <ErrorAlert message="Invalid data" error={parseError} />
         ),
@@ -101,27 +64,28 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        {/* TODO: Disable upload button while LLM is not ready; EventEmitter */}
-        {parsingTransactions && (
+        {state.matches("ProcessingFiles") && (
           <Button disabled>
             <Loader2 className="animate-spin" />
             Parsing Transactions...
-          </Button>)
-        }
-        {!parsingTransactions && <FileUploader
-          maxFiles={MAX_FILES}
-          maxSize={MAX_FILE_SIZE}
-          accept={SUPPORTED_FILE_TYPES}
-          onFilesUploaded={handleFilesUploaded}
-          dropzoneText={{
-            title: "Upload transactions",
-            description: "Drop your files here or click to browse",
-            dragActive: "Drop the files here",
-            fileCount: `Upload up to ${MAX_FILES} files (max ${MAX_FILE_SIZE}MB each)`,
-            allowedTypes: "Allowed file types:",
-          }}
-          disabled={!llmReady}
-        />}
+          </Button>
+        )}
+        {!state.matches("ProcessingFiles") && (
+          <FileUploader
+            maxFiles={MAX_FILES}
+            maxSize={MAX_FILE_SIZE}
+            accept={SUPPORTED_FILE_TYPES}
+            onFilesUploaded={handleFilesUploaded}
+            dropzoneText={{
+              title: "Upload transactions",
+              description: "Drop your files here or click to browse",
+              dragActive: "Drop the files here",
+              fileCount: `Upload up to ${MAX_FILES} files (max ${MAX_FILE_SIZE}MB each)`,
+              allowedTypes: "Allowed file types:",
+            }}
+            disabled={!llmReady}
+          />
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -180,7 +144,9 @@ export default function Dashboard() {
             <TableBody>
               {transactions.right.map((transaction) => (
                 <TableRow key={transaction.id}>
-                  <TableCell>{transaction.transactionDate.toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {transaction.transactionDate.toLocaleDateString()}
+                  </TableCell>
                   <TableCell>{transaction.merchant}</TableCell>
                   <TableCell>{transaction.category}</TableCell>
                   <TableCell className="text-right">

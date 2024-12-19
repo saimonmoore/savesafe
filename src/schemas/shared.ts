@@ -33,13 +33,13 @@ export const EmptyStringAsUndefined = Schema.UndefinedOr(Schema.String).pipe(
   })
 );
 
-export const PersistedDateSchema = Schema.String.pipe(
+export const PersistedDateSchema = Schema.ValidDateFromSelf.pipe(
   Schema.transform(
-    Schema.ValidDateFromSelf,
+    Schema.String,
     {
       strict: true,
-      decode: (str: string) => new Date(str),
-      encode: (date: Date) => date.toISOString(),
+      encode: (str: string) => new Date(str),
+      decode: (date: Date) => date.toISOString(),
     }
   )
 );

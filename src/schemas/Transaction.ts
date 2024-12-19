@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { CategorizationMethod } from "@/db/schemas/Transaction";
 import { CategoryValue } from "@/schemas/Category";
-import { FloatQuantityInsert, OptionalPersistedDate, PersistedDateSchema, PrimaryKeyIndex } from "@/schemas/shared";
+import { FloatQuantityInsert, FloatQuantityOrUndefined, OptionalPersistedDate, PersistedDateSchema, PrimaryKeyIndex } from "@/schemas/shared";
 
 export const CategorizationMethodSchema = Schema.Literal(
   ...(Object.values(CategorizationMethod) as [
@@ -15,16 +15,13 @@ export class TransactionInsert extends Schema.Class<TransactionInsert>(
 )({
   merchant: Schema.NonEmptyString,
   transactionDate: PersistedDateSchema,
-  effectiveDate: OptionalPersistedDate,
+  effectiveDate: Schema.optional(PersistedDateSchema),
   amount: FloatQuantityInsert,
-  balance: FloatQuantityInsert,
-  category: CategoryValue,
-  confidence: Schema.NonNegative,
-  categorizationMethod: CategorizationMethodSchema,
-  manuallyCategorized: Schema.Boolean.pipe(
-    Schema.propertySignature,
-    Schema.withConstructorDefault(() => false)
-  ),
+  balance: Schema.optional(FloatQuantityOrUndefined),
+  category: Schema.optional(CategoryValue),
+  confidence: Schema.optional(Schema.NonNegative),
+  categorizationMethod: Schema.optional(CategorizationMethodSchema),
+  manuallyCategorized: Schema.optional(Schema.Boolean),
 }) {}
 
 export class TransactionUpdate extends Schema.Class<TransactionUpdate>(

@@ -1,3 +1,4 @@
+import { Category } from "@/db/schemas/Category";
 import { CategorizationMethod } from "@/db/schemas/Transaction";
 
 export enum TransactionEvents {
@@ -20,7 +21,7 @@ export class Transaction {
     balance?: number;
     transactionDate: Date;
     effectiveDate?: Date;
-    category?: string;
+    category?: Category;
     confidence?: number;
     categorizationMethod?: CategorizationMethod;
 

@@ -4,6 +4,7 @@ import { Pglite } from "@/services/pglite";
 import { ReadApi } from "@/services/readApi";
 import { WriteApi } from "@/services/writeApi";
 import { AIClient } from "@/services/aiClient";
+import { TransactionsApi } from "./transactionsApi";
 
 const CustomConfigProvider = Layer.setConfigProvider(
   ConfigProvider.fromMap(
@@ -20,7 +21,8 @@ const MainLayer = Layer.mergeAll(
   ReadApi.Default,
   Migrations.Default,
   Pglite.Default,
-  AIClient.Default
+  AIClient.Default,
+  TransactionsApi.Default
 ).pipe(Layer.provide(CustomConfigProvider));
 
 export const RuntimeClient = ManagedRuntime.make(MainLayer);
