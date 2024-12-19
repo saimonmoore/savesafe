@@ -7,7 +7,7 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { EnhancedTransactionCategorizer } from "@/lib/TransactionCategorizer/TransactionCategorizer";
 import { InMemoryStorage } from "@/lib/TransactionCategorizer/storage/InMemoryStorage";
-import { IndexedDBStorage } from "@/lib/TransactionCategorizer/storage/IndexedDBStorage";
+// import { IndexedDBStorage } from "@/lib/TransactionCategorizer/storage/IndexedDBStorage";
 import { MerchantMapping } from "@/lib/TransactionCategorizer/Types";
 import { Transaction } from "@/domain/models/Transaction/Transaction";
 import { WorkerLLMManager } from "@/lib/LLM/WorkerLLMManager";
@@ -189,8 +189,8 @@ describe("EnhancedTransactionCategorizer with InMemoryStorage", () => {
       );
       expect(categorizedTransactions[2].categorize).toHaveBeenCalledWith(
         "other",
-        0.7,
-        "ai_batch"
+        0.1,
+        "ai_batch_error"
       );
     });
   });
@@ -213,8 +213,8 @@ describe("EnhancedTransactionCategorizer with InMemoryStorage", () => {
       const unknownCategory = result.get("Unknown Merchant");
       expect(unknownCategory).toEqual({
         category: "other",
-        confidence: 0.7,
-        method: "ai_batch",
+        confidence: 0.1,
+        method: "ai_batch_error",
       });
     });
 

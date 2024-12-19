@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { File } from "node:buffer";
 import { TransactionParser } from "@/lib/TransactionParser/TransactionParser";
 import { NotTransactionParserError, TransactionParserError } from "../errors";
 import { WorkerLLMManager } from "@/lib/LLM/WorkerLLMManager";

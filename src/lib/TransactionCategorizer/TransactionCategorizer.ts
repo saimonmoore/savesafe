@@ -4,10 +4,10 @@ import { WorkerLLMManager } from '@/lib/LLM/WorkerLLMManager';
 import { CategorizationMethod } from "@/db/schemas/Transaction";
 import { Transaction } from '@/domain/models/Transaction/Transaction';
 import { StorageBackend } from './storage/Storage';
-// import { InMemoryStorage } from './storage/InMemoryStorage';
+import { InMemoryStorage } from './storage/InMemoryStorage';
 import { Category, CATEGORIES } from '@/domain/models/Category/Category';
 import { Category as CategoryEnum } from "@/db/schemas/Category";
-import { IndexedDBStorage } from './storage/IndexedDBStorage';
+// import { IndexedDBStorage } from './storage/IndexedDBStorage';
 
 export class EnhancedTransactionCategorizer {
     private llmManager: WorkerLLMManager;
@@ -15,8 +15,8 @@ export class EnhancedTransactionCategorizer {
 
     constructor(storage?: StorageBackend) {
         this.llmManager = WorkerLLMManager.getInstance();
-        // this.storage = storage || new InMemoryStorage();
-        this.storage = storage || new IndexedDBStorage();
+        this.storage = storage || new InMemoryStorage();
+        // this.storage = storage || new IndexedDBStorage();
     }
 
     async bulkImportCategories(mappings: MerchantMapping[]): Promise<{ success: string[], error: MappingError[] }> {
