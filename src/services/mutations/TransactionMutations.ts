@@ -1,6 +1,6 @@
 import { flow } from "effect";
 import { Pglite } from "@/services/pglite";
-import { TransactionBatchInsert, TransactionInsert } from "@/schemas/Transaction";
+import { TransactionBatchInsert, TransactionInsert } from "@/schemas/TransactionSchema";
 import { transactionTable } from "@/db/schemas/Transaction";
 import { singleResult } from "@/lib/utils";
 import { execute, WriteApiError } from "@/services/writeApi";

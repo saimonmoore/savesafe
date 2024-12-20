@@ -21,9 +21,10 @@ import { DollarSign, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect } from "react";
 import { useMachine } from "@xstate/react";
 import { machine } from "@/machines/createTransactions";
+import { TransactionInsert } from "@/schemas/TransactionSchema";
 
 export default function Dashboard() {
-  const [state, send] = useMachine(machine);
+  const [snapshot, send] = useMachine(machine);
   const { llmReady } = useStore((state) => state);
 
   const handleFilesUploaded = (files: File[]) => {
@@ -31,14 +32,14 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (state.matches("FilesProcessed")) {
-      console.log("Raw transactions:", state.context.rawTransactions);
+    if (snapshot.matches("FilesProcessed")) {
+      console.log("Raw transactions:", snapshot.context.rawTransactions);
       send({
         type: "transactions.create",
-        transactions: state.context.rawTransactions,
+        transactions: snapshot.context.rawTransactions as TransactionInsert[],
       });
     }
-  }, [state]);
+  }, [snapshot]);
 
   const MAX_FILES = 3;
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
@@ -64,13 +65,13 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        {state.matches("ProcessingFiles") && (
+        {snapshot.matches("ProcessingFiles") && (
           <Button disabled>
             <Loader2 className="animate-spin" />
             Parsing Transactions...
           </Button>
         )}
-        {!state.matches("ProcessingFiles") && (
+        {!snapshot.matches("ProcessingFiles") && (
           <FileUploader
             maxFiles={MAX_FILES}
             maxSize={MAX_FILE_SIZE}

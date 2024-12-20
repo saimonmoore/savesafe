@@ -2,9 +2,7 @@ import { Schema } from "effect";
 import { Category } from "@/db/schemas/Category";
 import { PrimaryKeyIndex } from "./shared";
 
-export const CategoryValue = Schema.Literal(
-  ...Object.values(Category) as [Category, ...Category[]]
-);
+export const CategoryValue = Schema.Enums(Category);
 export const OptionalCategoryValue = Schema.UndefinedOr(CategoryValue);
 
 export class CategoryInsert extends Schema.Class<CategoryInsert>("CategoryInsert")({

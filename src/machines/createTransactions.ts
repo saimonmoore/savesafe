@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { assign, fromPromise, setup } from "xstate";
 import { RuntimeClient } from "@/services/runtimeClient";
 import { WriteApi } from "@/services/writeApi";
-import { TransactionInsert } from "@/schemas/Transaction";
+import { TransactionInsert } from "@/schemas/TransactionSchema";
 // import { PersistedDateSchema } from "@/schemas/shared";
 // import { TransactionProcessor } from "@/lib/TransactionProcessor/TransactionProcessor";
 import { Transaction } from "@/domain/models/Transaction/Transaction";

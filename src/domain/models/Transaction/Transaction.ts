@@ -6,6 +6,8 @@ export enum TransactionEvents {
     TransactionsCategorized = "TransactionsCategorizedEvent"
 }
 
+// Interim representation of a transaction as returned by parsing CSV files
+// Transaction schema can be used.
 export interface RawTransaction {
     merchant: string;
     amount: number;
@@ -14,6 +16,7 @@ export interface RawTransaction {
     effectiveDate?: Date;
 }
 
+// TODO: Replace with Transaction schema
 export class Transaction {
     merchant: string;
     amount: number;
